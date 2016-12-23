@@ -1,0 +1,123 @@
+class SinglewidePicturesController < ApplicationController
+
+# GET /pictures
+  # GET /pictures.json
+  def index
+
+    @gallery = Gallery.find(params[:gallery_id])
+
+    @singlewide_pictures = @gallery.singlewide_pictures
+
+    respond_to do |format|
+      format.html # index.html.erb
+      format.json { render json: @singlewide_pictures }
+    end
+  end
+
+  # GET /pictures/1
+  # GET /pictures/1.json
+  def show
+ #   @gallery = Gallery.find(params[:gallery_id])
+    gallery_id = session['selected_gallery'] if session['selected_gallery'].present?
+    @gallery = Gallery.find(
+    @singlewide_picture = SinglewidePicture.find(params[:id])
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @singlewide_picture }
+    end
+  end
+
+  # GET /pictures/new
+  # GET /pictures/new.json
+  def new
+    @gallery = Gallery.find(params[:gallery_id])
+    @singlewide_picture = @gallery.singlewide_pictures.build
+
+    respond_to do |format|
+      format.html # new.html.erb
+      format.json { render json: @picture }
+    end
+  end
+
+  # GET /pictures/1/edit
+  def edit
+   # @gallery = Gallery.find(params[:gallery_id])
+
+    @singlewide_picture = SinglewidePicture.find(params[:id])
+    # @picture = Picture.find(params[:id])
+  end
+
+  # POST /pictures
+  # POST /pictures.json
+  def create
+    @singlewide_picture = SinglewidePicture.new(params[:singlewide_picture])
+
+    if @singlewide_picture.save
+      respond_to do |format|
+        format.html {
+          render :json => [@singlewide_picture.to_jq_upload].to_json,
+          :content_type => 'text/html',
+          :layout => false
+        }
+        format.json {
+          render :json => [@singlewide_picture.to_jq_upload].to_json
+        }
+      end
+    else
+      render :json => [{:error => "custom_failure"}], :status => 304
+    end
+  end
+
+  # PUT /pictures/1
+  # PUT /pictures/1.json
+  def update
+
+    @gallery = Gallery.find(params[:gallery_id])
+
+    @singlewide_picture = @gallery.singlewide_pictures.find(params[:id])
+
+    respond_to do |format|
+      if @singlewide_picture.update_attributes(singlewide_picture_params)
+        format.html { redirect_to gallery_path(@gallery), notice: 'Picture was successfully updated.' }
+        format.json { head :no_content }
+      else
+        format.html { render action: "edit" }
+        format.json { render json: @singlewide_picture.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  # DELETE /pictures/1
+  # DELETE /pictures/1.json
+  def destroy
+    #@gallery = Gallery.find(params[:gallery_id])
+    #@picture = @gallery.pictures.find(params[:id])
+    @singlewide_picture = SinglewidePicture.find(params[:id])
+    @singlewide_picture.destroy
+
+    respond_to do |format|
+      format.html { redirect_to root_path }
+      format.js
+    end
+  end
+
+  def make_default
+    @singlewide_picture = SinglewidePicture.find(params[:id])
+    @gallery = Gallery.find(params[:gallery_id])
+
+    @gallery.cover = @singlewide_picture.id
+    @gallery.save
+
+    respond_to do |format|
+      format.js
+    end
+  end
+
+  private
+
+  def singlewide_picture_params
+    params.require(:singlewide_picture).permit(:description, :gallery_id, :image)
+  end
+
+end

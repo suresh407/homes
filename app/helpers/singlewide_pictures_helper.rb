@@ -1,0 +1,2 @@
+module SinglewidePicturesHelper
+end
